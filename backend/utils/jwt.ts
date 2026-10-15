@@ -1,7 +1,13 @@
 import { Response } from "express";
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "secret";
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT_SECRET is not set. Add it to backend/.env");
+  }
+  return secret;
+};
 
 const JWT_EXPIRES_IN = "7d";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // Milliseconds for Cookie (7 days)
@@ -17,7 +23,9 @@ const getCookieOptions = () => {
 };
 
 const generateJWT = (res: Response, userId: string) => {
-  const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  const token = jwt.sign({ userId }, getJwtSecret(), {
+    expiresIn: JWT_EXPIRES_IN,
+  });
 
   res.cookie("jwt", token, {
     ...getCookieOptions(),

@@ -5,7 +5,7 @@ import { AppError } from "../utils/AppError";
 export const validateCampground = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const campgroundSchema = Joi.object({
     title: Joi.string().required().trim(),
@@ -17,10 +17,12 @@ export const validateCampground = (
         Joi.object({
           url: Joi.string().required(),
           filename: Joi.string().required(),
-        })
+        }),
       )
       .required(),
-  }).unknown(true);
+    // Sent by the edit page: filenames of existing images to remove
+    imagesToDelete: Joi.array().items(Joi.string()),
+  });
 
   // shows all errors at once
   const { error, value } = campgroundSchema.validate(req.body, {

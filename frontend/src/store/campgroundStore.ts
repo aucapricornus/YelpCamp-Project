@@ -73,13 +73,13 @@ interface CampgroundStore {
   getCampgroundById: (id: string) => Promise<void>;
   updateCampground: (
     id: string,
-    payload: Partial<CreateCampgroundPayload>
+    payload: Partial<CreateCampgroundPayload>,
   ) => Promise<void>;
   deleteCampground: (id: string) => Promise<void>;
   clearError: () => void;
   addReview: (
     campgroundId: string,
-    payload: CreateReviewPayload
+    payload: CreateReviewPayload,
   ) => Promise<void>;
   deleteReview: (campgroundId: string, reviewId: string) => Promise<void>;
 }
@@ -98,9 +98,9 @@ export const useCampgroundStore = create<CampgroundStore>((set) => ({
     try {
       const data = await getCampgrounds(page, search);
       set({
-        campgrounds: data.campgrounds,
-        currentPage: data.currentPage,
-        totalPages: data.totalPages,
+        campgrounds: data.campgrounds ?? [],
+        currentPage: data.currentPage ?? 1,
+        totalPages: data.totalPages ?? 1,
         searchQuery: search,
         loading: false,
       });
@@ -146,7 +146,7 @@ export const useCampgroundStore = create<CampgroundStore>((set) => ({
       set((state) => ({
         campground: updatedCampground,
         campgrounds: state.campgrounds.map((c) =>
-          c._id === id ? updatedCampground : c
+          c._id === id ? updatedCampground : c,
         ),
         loading: false,
       }));
@@ -204,7 +204,7 @@ export const useCampgroundStore = create<CampgroundStore>((set) => ({
           campground: {
             ...state.campground,
             reviews: (state.campground.reviews || []).filter(
-              (r) => r._id !== reviewId
+              (r) => r._id !== reviewId,
             ),
           },
         };

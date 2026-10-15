@@ -10,7 +10,7 @@
     "module": "ESNext",
     // "target": "esnext",
     "moduleResolution": "bundler",
-    "types": ["node"],
+    "types": ["node", "bun"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

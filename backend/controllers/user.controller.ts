@@ -9,10 +9,10 @@ import { FORBIDDEN_USERNAMES } from "../utils/forbiddenUsernames";
 // GET ALL USERS
 ////////////////////////
 
-export async function getUsers(req: Request, res: Response) {
-  const users = await User.find();
-  res.status(200).json(users);
-}
+// export async function getUsers(req: Request, res: Response) {
+//   const users = await User.find();
+//   res.status(200).json(users);
+// }
 
 ////////////////////////
 // CREATE USER
@@ -22,7 +22,7 @@ export async function createUser(req: Request, res: Response) {
   const { username, password, email } = req.body;
   const lowerUsername = username.toLowerCase();
   const isForbidden = FORBIDDEN_USERNAMES.some((word) =>
-    lowerUsername.includes(word)
+    lowerUsername.includes(word),
   );
   if (isForbidden) {
     throw new AppError({
@@ -61,41 +61,41 @@ export async function createUser(req: Request, res: Response) {
 // FIND USER BY ID
 ////////////////////////
 
-export async function getUserById(req: Request, res: Response) {
-  const user = await User.findById(req.params.id).select("_id username email");
-  if (!user) throw new AppError({ message: "User not found", httpCode: 404 });
-  res.status(200).json(user);
-}
+// export async function getUserById(req: Request, res: Response) {
+//   const user = await User.findById(req.params.id).select("_id username email");
+//   if (!user) throw new AppError({ message: "User not found", httpCode: 404 });
+//   res.status(200).json(user);
+// }
 
 ////////////////////////
 // MODIFY USER
 ////////////////////////
 
-export async function updateUser(req: Request, res: Response) {
-  const { id } = req.params;
-  const { username, password } = req.body;
-  const salt = await bcrypt.genSalt(12);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  const user = await User.findByIdAndUpdate(
-    id,
-    { username: username, password: hashedPassword },
-    {
-      new: true,
-    }
-  );
-  if (!user) throw new AppError({ message: "User not found", httpCode: 404 });
-  res.status(200).json({ user });
-}
+// export async function updateUser(req: Request, res: Response) {
+//   const { id } = req.params;
+//   const { username, password } = req.body;
+//   const salt = await bcrypt.genSalt(12);
+//   const hashedPassword = await bcrypt.hash(password, salt);
+//   const user = await User.findByIdAndUpdate(
+//     id,
+//     { username: username, password: hashedPassword },
+//     {
+//       new: true,
+//     },
+//   );
+//   if (!user) throw new AppError({ message: "User not found", httpCode: 404 });
+//   res.status(200).json({ user });
+// }
 
 ////////////////////////
 // DELETE USER
 ////////////////////////
 
-export async function deleteUser(req: Request, res: Response) {
-  const user = await User.findByIdAndDelete(req.params.id);
-  if (!user) throw new AppError({ message: "User not found", httpCode: 404 });
-  res.status(200).json({ message: "User deleted successfully" });
-}
+// export async function deleteUser(req: Request, res: Response) {
+//   const user = await User.findByIdAndDelete(req.params.id);
+//   if (!user) throw new AppError({ message: "User not found", httpCode: 404 });
+//   res.status(200).json({ message: "User deleted successfully" });
+// }
 
 ////////////////////////
 // LOGIN USER

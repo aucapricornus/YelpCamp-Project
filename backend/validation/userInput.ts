@@ -5,7 +5,7 @@ import { AppError } from "../utils/AppError";
 export const validateUserInput = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const userSchema = Joi.object({
     username: Joi.string().required().trim(),
@@ -13,6 +13,7 @@ export const validateUserInput = (
       minDomainSegments: 2,
       tlds: { allow: ["com", "net"] },
     }),
+    password: Joi.string().min(8).max(72).required(),
   });
 
   const { error, value } = userSchema.validate(req.body, {
