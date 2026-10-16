@@ -51,6 +51,14 @@ describe("POST /api/users/register", () => {
     expect(res.body.message).toBe("Username already taken.");
   });
 
+  it("rejects a short password and creates no user", async () => {
+    const res = await request(app)
+      .post("/api/users/register")
+      .send({ ...newUser, password: "abc" });
+    expect(res.status).toBe(400);
+    expect(await User.findOne({ email: newUser.email })).toBeNull();
+  });
+
   it("rejects reserved usernames", async () => {
     const res = await request(app)
       .post("/api/users/register")

@@ -1,4 +1,12 @@
-import { describe, it, expect, spyOn, beforeEach, afterEach, mock } from "bun:test";
+import {
+  describe,
+  it,
+  expect,
+  spyOn,
+  beforeEach,
+  afterEach,
+  mock,
+} from "bun:test";
 import request from "supertest";
 import axios from "axios";
 import mongoose from "mongoose";
@@ -7,16 +15,26 @@ import Campground from "../../models/campground.model";
 import Review from "../../models/review.model";
 import { utapi } from "../../uploads/utapi";
 import { useTestDb } from "../db";
-import { authCookie, createTestCampground, createTestUser, validCampgroundBody } from "../helpers";
+import {
+  authCookie,
+  createTestCampground,
+  createTestUser,
+  validCampgroundBody,
+} from "../helpers";
 
 useTestDb();
 
 beforeEach(() => {
   // Never call MapTiler or UploadThing from tests.
   spyOn(axios, "get").mockResolvedValue({
-    data: { features: [{ geometry: { type: "Point", coordinates: [-119.5, 37.8] } }] },
+    data: {
+      features: [{ geometry: { type: "Point", coordinates: [-119.5, 37.8] } }],
+    },
   });
-  spyOn(utapi, "deleteFiles").mockResolvedValue({ success: true, deletedCount: 1 } as any);
+  spyOn(utapi, "deleteFiles").mockResolvedValue({
+    success: true,
+    deletedCount: 1,
+  } as any);
 });
 
 afterEach(() => {
@@ -43,9 +61,18 @@ describe("GET /api/campgrounds", () => {
 
   it("searches title and location, ignoring case", async () => {
     const author = await createTestUser();
-    await createTestCampground(author._id, { title: "Pine Ridge", location: "Oregon" });
-    await createTestCampground(author._id, { title: "Desert Bloom", location: "Arizona" });
-    await createTestCampground(author._id, { title: "Lakeside", location: "Pine Valley" });
+    await createTestCampground(author._id, {
+      title: "Pine Ridge",
+      location: "Oregon",
+    });
+    await createTestCampground(author._id, {
+      title: "Desert Bloom",
+      location: "Arizona",
+    });
+    await createTestCampground(author._id, {
+      title: "Lakeside",
+      location: "Pine Valley",
+    });
 
     const res = await request(app).get("/api/campgrounds?search=pine");
     const titles = res.body.campgrounds.map((c: any) => c.title).sort();
@@ -65,7 +92,9 @@ describe("GET /api/campgrounds/:id", () => {
   });
 
   it("returns 404 for an id that doesn't exist", async () => {
-    const res = await request(app).get(`/api/campgrounds/${new mongoose.Types.ObjectId()}`);
+    const res = await request(app).get(
+      `/api/campgrounds/${new mongoose.Types.ObjectId()}`,
+    );
     expect(res.status).toBe(404);
   });
 
@@ -77,7 +106,9 @@ describe("GET /api/campgrounds/:id", () => {
 
 describe("POST /api/campgrounds", () => {
   it("requires login", async () => {
-    const res = await request(app).post("/api/campgrounds").send(validCampgroundBody());
+    const res = await request(app)
+      .post("/api/campgrounds")
+      .send(validCampgroundBody());
     expect(res.status).toBe(401);
   });
 
@@ -137,7 +168,10 @@ describe("PUT /api/campgrounds/:id", () => {
   it("enforces the 15 image limit", async () => {
     const author = await createTestUser();
     const camp = await createTestCampground(author._id); // already has 1 image
-    const images = Array.from({ length: 15 }, (_, i) => ({ url: `https://utfs.io/f/${i}.jpg`, filename: `${i}.jpg` }));
+    const images = Array.from({ length: 15 }, (_, i) => ({
+      url: `https://utfs.io/f/${i}.jpg`,
+      filename: `${i}.jpg`,
+    }));
 
     const res = await request(app)
       .put(`/api/campgrounds/${camp._id}`)
@@ -147,13 +181,56 @@ describe("PUT /api/campgrounds/:id", () => {
     expect(res.status).toBe(400);
     expect(res.body.message).toContain("Max 15");
   });
+  it("ignores attempts to change the author or reviews", async () => {
+    const author = await createTestUser();
+    const camp = await createTestCampground(author._id);
+
+    const res = await request(app)
+      .put(`/api/campgrounds/${camp._id}`)
+      .set("Cookie", authCookie(author._id))
+      .send({
+        ...validCampgroundBody(),
+        images: [],
+        author: new mongoose.Types.ObjectId(),
+        reviews: [new mongoose.Types.ObjectId()],
+      });
+
+    expect(res.status).toBe(200);
+    const saved = await Campground.findById(camp._id);
+    expect(String(saved!.author)).toBe(String(author._id));
+    expect(saved!.reviews).toHaveLength(0);
+  });
+
+  it("removes images listed in imagesToDelete", async () => {
+    const author = await createTestUser();
+    const camp = await createTestCampground(author._id); // has pine.jpg
+
+    const res = await request(app)
+      .put(`/api/campgrounds/${camp._id}`)
+      .set("Cookie", authCookie(author._id))
+      .send({
+        ...validCampgroundBody(),
+        images: [],
+        imagesToDelete: ["pine.jpg"],
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.campground.images).toHaveLength(0);
+    expect(utapi.deleteFiles).toHaveBeenCalledWith(["pine.jpg"]);
+  });
 });
 
 describe("DELETE /api/campgrounds/:id", () => {
   it("deletes the campground, its reviews and its images", async () => {
     const author = await createTestUser();
-    const review = await Review.create({ body: "Nice", rating: 5, author: author._id });
-    const camp = await createTestCampground(author._id, { reviews: [review._id] });
+    const review = await Review.create({
+      body: "Nice",
+      rating: 5,
+      author: author._id,
+    });
+    const camp = await createTestCampground(author._id, {
+      reviews: [review._id],
+    });
 
     const res = await request(app)
       .delete(`/api/campgrounds/${camp._id}`)

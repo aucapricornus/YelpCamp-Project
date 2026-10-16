@@ -24,7 +24,10 @@ describe("validateCampground", () => {
   });
 
   it("rejects a negative price", () => {
-    const { error } = run(validateCampground, { ...validCampgroundBody(), price: -5 });
+    const { error } = run(validateCampground, {
+      ...validCampgroundBody(),
+      price: -5,
+    });
     expect(error).toBeInstanceOf(AppError);
     expect(error!.httpCode).toBe(400);
     expect(error!.message).toContain("price");
@@ -52,14 +55,19 @@ describe("validateCampground", () => {
   // `it.failing` passes while the bug exists. Once you fix the schema, Bun will
   // report this test as failing: change `it.failing` back to `it` at that point.
   it.failing("strips fields it doesn't know about", () => {
-    const { ctx } = run(validateCampground, { ...validCampgroundBody(), author: "someone-else" });
+    const { ctx } = run(validateCampground, {
+      ...validCampgroundBody(),
+      author: "someone-else",
+    });
     expect(ctx.req.body.author).toBeUndefined();
   });
 });
 
 describe("validateReview", () => {
   it("accepts a valid review", () => {
-    const { error } = run(validateReview, { review: { rating: 4, body: "Lovely" } });
+    const { error } = run(validateReview, {
+      review: { rating: 4, body: "Lovely" },
+    });
     expect(error).toBeUndefined();
   });
 
@@ -82,18 +90,37 @@ describe("validateReview", () => {
 });
 
 describe("validateUserInput", () => {
-  it("accepts a username and a .com email", () => {
-    const { error } = run(validateUserInput, { username: "daniel", email: "d@example.com" });
+  const valid = {
+    username: "daniel",
+    email: "d@example.com",
+    password: "secret123",
+  };
+
+  it("accepts a username, a .com email and an 8+ character password", () => {
+    const { error } = run(validateUserInput, valid);
     expect(error).toBeUndefined();
   });
 
   it("requires a username", () => {
-    const { error } = run(validateUserInput, { email: "d@example.com" });
+    const { error } = run(validateUserInput, { ...valid, username: undefined });
     expect(error!.httpCode).toBe(400);
   });
 
   it("rejects an invalid email", () => {
-    const { error } = run(validateUserInput, { username: "daniel", email: "not-an-email" });
+    const { error } = run(validateUserInput, {
+      ...valid,
+      email: "not-an-email",
+    });
     expect(error!.httpCode).toBe(400);
+  });
+
+  it("requires a password", () => {
+    const { error } = run(validateUserInput, { ...valid, password: undefined });
+    expect(error!.message).toContain("password");
+  });
+
+  it("rejects a password shorter than 8 characters", () => {
+    const { error } = run(validateUserInput, { ...valid, password: "short" });
+    expect(error!.message).toContain("at least 8");
   });
 });

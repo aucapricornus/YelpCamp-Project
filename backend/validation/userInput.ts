@@ -9,10 +9,7 @@ export const validateUserInput = (
 ) => {
   const userSchema = Joi.object({
     username: Joi.string().required().trim(),
-    email: Joi.string().email({
-      minDomainSegments: 2,
-      tlds: { allow: ["com", "net"] },
-    }),
+    email: Joi.string().email({ minDomainSegments: 2 }).required(),
     password: Joi.string().min(8).max(72).required(),
   });
 
