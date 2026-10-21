@@ -119,21 +119,21 @@ export default function Footer() {
             <div className="d-flex gap-3">
               <a
                 target="blank"
-                href="https://github.com/Gravyon"
+                href="https://github.com/aucapricornus"
                 className="text-muted fs-4 social-icon"
               >
                 <FaGithub />
               </a>
               <a
                 target="blank"
-                href="https://github.com/Gravyon"
+                href="https://github.com/aucapricornus"
                 className="text-muted fs-4 social-icon"
               >
                 <FaTwitter />
               </a>
               <a
                 target="blank"
-                href="https://github.com/Gravyon"
+                href="https://github.com/aucapricornus"
                 className="text-muted fs-4 social-icon"
               >
                 <FaInstagram />
