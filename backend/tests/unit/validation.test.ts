@@ -50,11 +50,7 @@ describe("validateCampground", () => {
     expect(error!.httpCode).toBe(400);
   });
 
-  // KNOWN BUG: `.unknown(true)` in campgroundSchema.ts lets extra fields through,
-  // so PUT /api/campgrounds/:id can overwrite `author` or `reviews`.
-  // `it.failing` passes while the bug exists. Once you fix the schema, Bun will
-  // report this test as failing: change `it.failing` back to `it` at that point.
-  it.failing("strips fields it doesn't know about", () => {
+  it("strips fields it doesn't know about", () => {
     const { ctx } = run(validateCampground, {
       ...validCampgroundBody(),
       author: "someone-else",
